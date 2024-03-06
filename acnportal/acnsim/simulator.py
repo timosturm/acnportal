@@ -274,12 +274,12 @@ class Simulator(BaseSimObj):
             max_diff = diff_vec[max_idx]
             max_timeidx = max_idx[1]
             max_constraint = self.network.constraint_index[max_idx[0]]
-            warnings.warn(
-                f"Invalid schedule provided at iteration {self._iteration}. "
-                f"Max violation is {max_diff} A on {max_constraint} "
-                f"at time index {max_timeidx}.",
-                UserWarning,
-            )
+            #warnings.warn(
+            #    f"Invalid schedule provided at iteration {self._iteration}. "
+            #    f"Max violation is {max_diff} A on {max_constraint} "
+            #    f"at time index {max_timeidx}.",
+            #    UserWarning,
+            #)
         if self._iteration + schedule_length <= self.pilot_signals.shape[1]:
             self.pilot_signals[
                 :, self._iteration : (self._iteration + schedule_length)
