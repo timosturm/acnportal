@@ -1,6 +1,8 @@
 from builtins import property
 from typing import Optional, Dict, Any, Tuple
 
+from acnportal.acnsim.models.battery import Battery
+
 from ..base import BaseSimObj
 
 
@@ -18,13 +20,13 @@ class EV(BaseSimObj):
 
     def __init__(
         self,
-        arrival,
-        departure,
-        requested_energy,
-        station_id,
-        session_id,
-        battery,
-        estimated_departure=None,
+        arrival: int,
+        departure: int,
+        requested_energy: float,
+        station_id: str,
+        session_id: str,
+        battery: Battery,
+        estimated_departure: Optional[int] = None,
     ):
         # User Defined Parameters
         self._arrival = arrival
@@ -44,62 +46,62 @@ class EV(BaseSimObj):
         self._current_charging_rate = 0
 
     @property
-    def arrival(self):
+    def arrival(self) -> int:
         """ Return the arrival time of the EV."""
         return self._arrival
 
     @arrival.setter
-    def arrival(self, value):
+    def arrival(self, value: int):
         """ Set the arrival time of the EV. (int) """
         self._arrival = value
 
     @property
-    def departure(self):
+    def departure(self) -> int:
         """ Return the departure time of the EV. (int) """
         return self._departure
 
     @departure.setter
-    def departure(self, value):
+    def departure(self, value: int):
         """ Set the departure time of the EV. (int) """
         self._departure = value
 
     @property
-    def estimated_departure(self):
+    def estimated_departure(self) -> int:
         """ Return the estimated departure time of the EV."""
         return self._estimated_departure
 
     @estimated_departure.setter
-    def estimated_departure(self, value):
+    def estimated_departure(self, value: int):
         """ Set the estimated departure time of the EV. (int) """
         self._estimated_departure = value
 
     @property
-    def requested_energy(self):
+    def requested_energy(self) -> float:
         """ Return the energy request of the EV for this session. (float) [acnsim units]. """
         return self._requested_energy
 
     @property
-    def session_id(self):
+    def session_id(self) -> str:
         """ Return the unique session identifier for this charging session. (str) """
         return self._session_id
 
     @property
-    def station_id(self):
+    def station_id(self) -> str:
         """ Return the unique identifier for the EVSE used for this charging session. """
         return self._station_id
 
     @property
-    def energy_delivered(self):
+    def energy_delivered(self) -> float:
         """ Return the total energy delivered so far in this charging session. (float) """
         return self._energy_delivered
 
     @property
-    def current_charging_rate(self):
+    def current_charging_rate(self) -> float:
         """ Return the current charging rate of the EV. (float) """
         return self._current_charging_rate
 
     @property
-    def remaining_demand(self):
+    def remaining_demand(self) -> float:
         """ Return the remaining energy demand of this session. (float)
 
         Defined as the difference between the requested energy of the session and the energy delivered so far.
@@ -107,27 +109,27 @@ class EV(BaseSimObj):
         return self.requested_energy - self.energy_delivered
 
     @property
-    def fully_charged(self):
+    def fully_charged(self) -> bool:
         """ Return True if the EV's demand has been fully met. (bool)"""
         return not (self.remaining_demand > 1e-3)
 
     @property
-    def percent_remaining(self):
+    def percent_remaining(self) -> float:
         """ Return the percent of demand which still needs to be fulfilled. (float)
 
         Defined as the ratio of remaining demand and requested energy. """
         return self.remaining_demand / self.requested_energy
 
     @property
-    def maximum_charging_power(self):
+    def maximum_charging_power(self) -> float:
         """ Return the maximum charging power of the battery."""
         return self._battery.max_charging_power
 
-    def update_station_id(self, station_id):
+    def update_station_id(self, station_id: str):
         """ Method to update the station where EV will charge. """
         self._station_id = station_id
 
-    def charge(self, pilot, voltage, period):
+    def charge(self, pilot: float, voltage: float, period: int):
         """ Method to "charge" the ev.
 
         Args:
@@ -139,7 +141,8 @@ class EV(BaseSimObj):
             float: Actual charging rate of the ev. [A]
         """
         charge_rate = self._battery.charge(pilot, voltage, period)
-        self._energy_delivered += (charge_rate * voltage) / 1000 * (period / 60)
+        self._energy_delivered += (charge_rate *
+                                   voltage) / 1000 * (period / 60)
         self._current_charging_rate = charge_rate
         return charge_rate
 
@@ -171,7 +174,8 @@ class EV(BaseSimObj):
             attribute_dict[attr] = getattr(self, attr)
 
         # noinspection PyProtectedMember
-        registry, context_dict = self._battery._to_registry(context_dict=context_dict)
+        registry, context_dict = self._battery._to_registry(
+            context_dict=context_dict)
         attribute_dict["_battery"] = registry["id"]
 
         return attribute_dict, context_dict
